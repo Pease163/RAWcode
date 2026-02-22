@@ -1,11 +1,16 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Calculator } from 'lucide-react';
-import { questions } from '@/app/data/calculator-data';
+import { ArrowRight, ArrowLeft, Calculator, Globe, Server, Smartphone } from 'lucide-react';
+import { categories, categoryQuestions } from '@/app/data/calculator-data';
 import { AnimatedNumber } from '@/app/components/ui/AnimatedNumber';
 import { fadeInUp30 } from '@/app/lib/animations';
 import { ctaButtonClass, sectionClass, focusRingClass } from '@/app/lib/styles';
 import { trackGoal } from '@/app/lib/analytics';
+import type { LucideIcon } from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon> = { Globe, Server, Smartphone };
+
+const TOTAL_STEPS = 5; // 1 category + 4 questions
 
 const formatPrice = (v: number) => `${Math.round(v).toLocaleString('ru-RU')}`;
 
@@ -16,9 +21,18 @@ interface AnswerDetail {
 }
 
 export function CostCalculator() {
+  const [category, setCategory] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<AnswerDetail[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  const questions = category ? categoryQuestions[category] : [];
+
+  const handleCategorySelect = (id: string) => {
+    setCategory(id);
+    setStep(0);
+    setAnswers([]);
+  };
 
   const handleAnswer = (value: number, label: string) => {
     const newAnswers = [...answers, { value, label, questionId: questions[step].id }];
@@ -33,6 +47,9 @@ export function CostCalculator() {
     if (step > 0) {
       setStep(step - 1);
       setAnswers(answers.slice(0, -1));
+    } else {
+      setCategory(null);
+      setAnswers([]);
     }
   };
 
@@ -68,10 +85,15 @@ export function CostCalculator() {
     return { items, multiplier };
   };
 
-  const isComplete = answers.length === questions.length;
+  const isComplete = category !== null && answers.length === questions.length;
   const total = calculateTotal();
+  const categoryLabel = categories.find((c) => c.id === category)?.label;
+
+  // Progress: segment 0 = category (filled when category chosen), segments 1-4 = questions
+  const activeSegment = category === null ? 0 : step + 1;
 
   const reset = () => {
+    setCategory(null);
     setStep(0);
     setAnswers([]);
   };
@@ -98,7 +120,7 @@ export function CostCalculator() {
                   <span className="text-[#CCFF00]">стоимости</span>
                 </h3>
                 <p className="text-[#D4D4D0] mb-8 max-w-xl mx-auto">
-                  Ответьте на 5 вопросов и узнайте примерную стоимость вашего проекта
+                  Ответьте на несколько вопросов и узнайте примерную стоимость вашего проекта
                 </p>
                 <span className={`inline-flex items-center gap-2 ${ctaButtonClass}`}>
                   Рассчитать стоимость
@@ -117,54 +139,90 @@ export function CostCalculator() {
               >
                 {!isComplete ? (
                   <>
-                    {/* Progress — spring animated bars */}
+                    {/* Progress — 5 segments */}
                     <div className="flex gap-2 mb-8">
-                      {questions.map((_, i) => (
+                      {Array.from({ length: TOTAL_STEPS }, (_, i) => (
                         <motion.div
                           key={i}
                           className="h-1 flex-1 rounded-full"
                           animate={{
-                            backgroundColor: i <= step ? '#CCFF00' : 'rgba(255,255,255,0.1)',
+                            backgroundColor: i < activeSegment ? '#CCFF00' : i === activeSegment ? '#CCFF00' : 'rgba(255,255,255,0.1)',
                           }}
                           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                         />
                       ))}
                     </div>
 
-                    {/* Question */}
                     <AnimatePresence mode="wait">
-                      <motion.div
-                        key={step}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <p className="text-[#D4D4D0] text-sm mb-2">
-                          Вопрос {step + 1} из {questions.length}
-                        </p>
-                        <h4 className="text-2xl font-bold text-[#F4F4F0] mb-8">
-                          {questions[step].question}
-                        </h4>
+                      {category === null ? (
+                        /* Category selection */
+                        <motion.div
+                          key="category-select"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <h4 className="text-2xl font-bold text-[#F4F4F0] mb-8">
+                            Что вам нужно?
+                          </h4>
 
-                        <div className="space-y-3">
-                          {questions[step].options.map((option) => (
-                            <motion.button
-                              key={option.label}
-                              whileHover={{ scale: 1.02, x: 4 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handleAnswer(option.value, option.label)}
-                              className={`w-full text-left p-5 rounded-2xl bg-[#0F0F11] border-2 border-white/10 text-[#F4F4F0] hover:border-[#CCFF00] hover:bg-[#CCFF00]/5 transition-all duration-200 ${focusRingClass}`}
-                            >
-                              {option.label}
-                            </motion.button>
-                          ))}
-                        </div>
-                      </motion.div>
+                          <div className="space-y-3">
+                            {categories.map((cat) => {
+                              const Icon = iconMap[cat.icon];
+                              return (
+                                <motion.button
+                                  key={cat.id}
+                                  whileHover={{ scale: 1.02, x: 4 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => handleCategorySelect(cat.id)}
+                                  className={`w-full text-left p-5 rounded-2xl bg-[#0F0F11] border-2 border-white/10 hover:border-[#CCFF00] hover:bg-[#CCFF00]/5 transition-all duration-200 flex items-center gap-4 ${focusRingClass}`}
+                                >
+                                  {Icon && <Icon className="w-6 h-6 text-[#CCFF00] shrink-0" />}
+                                  <div>
+                                    <span className="text-[#F4F4F0] font-medium block">{cat.label}</span>
+                                    <span className="text-[#D4D4D0] text-sm">{cat.description}</span>
+                                  </div>
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      ) : (
+                        /* Question */
+                        <motion.div
+                          key={`${category}-${step}`}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <p className="text-[#D4D4D0] text-sm mb-2">
+                            Вопрос {step + 1} из {questions.length}
+                          </p>
+                          <h4 className="text-2xl font-bold text-[#F4F4F0] mb-8">
+                            {questions[step].question}
+                          </h4>
+
+                          <div className="space-y-3">
+                            {questions[step].options.map((option) => (
+                              <motion.button
+                                key={option.label}
+                                whileHover={{ scale: 1.02, x: 4 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleAnswer(option.value, option.label)}
+                                className={`w-full text-left p-5 rounded-2xl bg-[#0F0F11] border-2 border-white/10 text-[#F4F4F0] hover:border-[#CCFF00] hover:bg-[#CCFF00]/5 transition-all duration-200 ${focusRingClass}`}
+                              >
+                                {option.label}
+                              </motion.button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
 
-                    {/* Back button */}
-                    {step > 0 && (
+                    {/* Back button — visible on category questions (back to categories) and on later steps */}
+                    {category !== null && (
                       <button
                         onClick={goBack}
                         className="mt-6 flex items-center gap-2 text-[#D4D4D0] hover:text-[#CCFF00] transition-colors"
@@ -179,7 +237,7 @@ export function CostCalculator() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    onAnimationComplete={() => trackGoal('calculator_complete', { total: String(total) })}
+                    onAnimationComplete={() => trackGoal('calculator_complete', { total: String(total), category: category! })}
                     className="text-center py-8"
                   >
                     <p className="text-[#CCFF00] text-sm font-bold uppercase tracking-wider mb-4">
@@ -195,6 +253,7 @@ export function CostCalculator() {
                       const { items } = getBreakdown();
                       return items.length > 0 ? (
                         <div className="bg-[#0F0F11] rounded-2xl p-5 mb-8 text-left max-w-sm mx-auto border border-white/5">
+                          <p className="text-xs text-[#D4D4D0]/50 uppercase tracking-wider mb-1">{categoryLabel}</p>
                           <p className="text-xs text-[#D4D4D0]/50 uppercase tracking-wider mb-3">Детализация</p>
                           {items.map((item, i) => (
                             <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
