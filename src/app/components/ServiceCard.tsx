@@ -1,6 +1,7 @@
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import { Check } from 'lucide-react';
 import { useRef } from 'react';
+import { useIsCoarsePointer } from '@/app/hooks/useIsCoarsePointer';
 import { Link } from 'react-router-dom';
 import type { ServiceCategory } from '@/app/data/services-data';
 import { fadeInUp30, staggerDelay } from '@/app/lib/animations';
@@ -21,9 +22,10 @@ export function ServiceCard({
   const rotateX = useSpring(rawRotateX, springConfig);
   const rotateY = useSpring(rawRotateY, springConfig);
   const cardRef = useRef<HTMLDivElement>(null);
+  const isCoarse = useIsCoarsePointer();
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (isCoarse || !cardRef.current) return;
 
     const card = cardRef.current;
     const rect = card.getBoundingClientRect();

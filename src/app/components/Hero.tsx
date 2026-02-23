@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform, useInView } from 'motion/react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { MagneticButton } from '@/app/components/MagneticButton';
 import { AnimatedNumber } from '@/app/components/ui/AnimatedNumber';
@@ -28,6 +28,7 @@ function KineticTitle({ text, className, delay = 0 }: { text: string; className?
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: false });
   const { scrollY } = useScroll();
 
   // Parallax for background circles
@@ -38,29 +39,31 @@ export function Hero() {
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center overflow-hidden pt-20 px-6">
 
-      {/* Animated Circles with Parallax */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            style={{ y: circle1Y, willChange: 'transform' }}
-            className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] border border-white/5 rounded-full"
-          />
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-            style={{ y: circle2Y, willChange: 'transform' }}
-            className="absolute w-[220px] h-[220px] md:w-[450px] md:h-[450px] border border-white/5 rounded-full"
-          />
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-            style={{ y: circle3Y, willChange: 'transform' }}
-            className="absolute w-[150px] h-[150px] md:w-[300px] md:h-[300px] border border-white/5 rounded-full"
-          />
+      {/* Animated Circles with Parallax — unmount when out of viewport */}
+      {isInView && (
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              style={{ y: circle1Y }}
+              className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] border border-white/5 rounded-full"
+            />
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+              style={{ y: circle2Y }}
+              className="absolute w-[220px] h-[220px] md:w-[450px] md:h-[450px] border border-white/5 rounded-full"
+            />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+              style={{ y: circle3Y }}
+              className="absolute w-[150px] h-[150px] md:w-[300px] md:h-[300px] border border-white/5 rounded-full"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Noise Texture Overlay */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuNSIvPjwvc3ZnPg==')]"></div>

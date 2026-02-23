@@ -31,13 +31,13 @@ export function HomePage() {
     <>
       <Hero />
       <Marquee />
-      <About />
-      <Services />
-      <CostCalculator />
-      <Process />
-      <Portfolio />
-      <Testimonials />
-      <FAQ />
+      <div className="cv-auto"><About /></div>
+      <div className="cv-auto"><Services /></div>
+      <div className="cv-auto"><CostCalculator /></div>
+      <div className="cv-auto"><Process /></div>
+      <div className="cv-auto"><Portfolio /></div>
+      <div className="cv-auto"><Testimonials /></div>
+      <div className="cv-auto"><FAQ /></div>
       <Footer />
     </>
   );

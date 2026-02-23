@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
+import { useIsCoarsePointer } from '@/app/hooks/useIsCoarsePointer';
 
 interface MagneticButtonProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ export function MagneticButton({ children, className = '', href, onClick }: Magn
   const springY = useSpring(y, springConfig);
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const isCoarse = useIsCoarsePointer();
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const ref = href ? anchorRef.current : buttonRef.current;
@@ -40,6 +42,12 @@ export function MagneticButton({ children, className = '', href, onClick }: Magn
     x.set(0);
     y.set(0);
   };
+
+  // Touch devices: render plain elements without motion wrappers
+  if (isCoarse) {
+    if (href) return <a className={className} href={href}>{children}</a>;
+    return <button className={className} onClick={onClick}>{children}</button>;
+  }
 
   if (href) {
     return (

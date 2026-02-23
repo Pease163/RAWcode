@@ -44,7 +44,7 @@ export function Process() {
                   }}
                   className="group"
                 >
-                  <div className="relative bg-white/[0.04] border border-white/10 rounded-2xl p-6 md:p-8 h-full flex flex-col group-hover:border-[#CCFF00]/50 group-hover:shadow-[0_20px_50px_rgba(204,255,0,0.1)] transition-[border-color,box-shadow] duration-300">
+                  <div className="relative bg-white/[0.04] border border-white/10 rounded-2xl p-6 md:p-8 h-full flex flex-col group-hover:border-[#CCFF00]/50 group-hover:shadow-[0_10px_30px_rgba(204,255,0,0.1)] transition-[border-color,box-shadow] duration-300">
                     {/* Step number — animated counter */}
                     <span
                       className="absolute top-4 right-6 text-5xl md:text-7xl font-extrabold text-white/[0.04] group-hover:text-[#CCFF00]/10 transition-colors duration-300 select-none pointer-events-none leading-none"

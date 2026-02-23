@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowRight, ArrowLeft, Calculator, Globe, Server, Smartphone } from 'lucide-react';
 import { categories, categoryQuestions } from '@/app/data/calculator-data';
 import { AnimatedNumber } from '@/app/components/ui/AnimatedNumber';
@@ -53,20 +53,20 @@ export function CostCalculator() {
     }
   };
 
-  const calculateTotal = () => {
-    let total = 0;
+  const total = useMemo(() => {
+    let sum = 0;
     let multiplier = 1;
 
     answers.forEach((a) => {
       if (a.value === -1) multiplier = 1.3;
       else if (a.value === -2) multiplier = 1.5;
-      else total += a.value;
+      else sum += a.value;
     });
 
-    return Math.round(total * multiplier);
-  };
+    return Math.round(sum * multiplier);
+  }, [answers]);
 
-  const getBreakdown = () => {
+  const breakdown = useMemo(() => {
     const items: { label: string; value: string }[] = [];
     let multiplier = 1;
 
@@ -83,10 +83,9 @@ export function CostCalculator() {
     });
 
     return { items, multiplier };
-  };
+  }, [answers]);
 
   const isComplete = category !== null && answers.length === questions.length;
-  const total = calculateTotal();
   const categoryLabel = categories.find((c) => c.id === category)?.label;
 
   // Progress: segment 0 = category (filled when category chosen), segments 1-4 = questions
@@ -250,7 +249,7 @@ export function CostCalculator() {
 
                     {/* Price breakdown */}
                     {(() => {
-                      const { items } = getBreakdown();
+                      const { items } = breakdown;
                       return items.length > 0 ? (
                         <div className="bg-[#0F0F11] rounded-2xl p-5 mb-8 text-left max-w-sm mx-auto border border-white/5">
                           <p className="text-xs text-[#D4D4D0]/50 uppercase tracking-wider mb-1">{categoryLabel}</p>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
 import { ArrowUp } from 'lucide-react';
 
@@ -6,8 +6,13 @@ export function BackToTop() {
   const [visible, setVisible] = useState(false);
   const { scrollYProgress } = useScroll();
 
+  const visibleRef = useRef(false);
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    setVisible(latest > 0.15);
+    const shouldShow = latest > 0.15;
+    if (shouldShow !== visibleRef.current) {
+      visibleRef.current = shouldShow;
+      setVisible(shouldShow);
+    }
   });
 
   const scrollToTop = () => {

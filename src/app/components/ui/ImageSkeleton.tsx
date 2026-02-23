@@ -9,9 +9,10 @@ interface ImageSkeletonProps {
   width?: number;
   height?: number;
   srcWebp?: string;
+  srcAvif?: string;
 }
 
-export function ImageSkeleton({ src, alt, className = '', loading = 'lazy', width, height, srcWebp }: ImageSkeletonProps) {
+export function ImageSkeleton({ src, alt, className = '', loading = 'lazy', width, height, srcWebp, srcAvif }: ImageSkeletonProps) {
   const [loaded, setLoaded] = useState(false);
 
   const imgElement = (
@@ -40,9 +41,10 @@ export function ImageSkeleton({ src, alt, className = '', loading = 'lazy', widt
           </motion.div>
         )}
       </AnimatePresence>
-      {srcWebp ? (
+      {srcWebp || srcAvif ? (
         <picture>
-          <source srcSet={srcWebp} type="image/webp" />
+          {srcAvif && <source srcSet={srcAvif} type="image/avif" />}
+          {srcWebp && <source srcSet={srcWebp} type="image/webp" />}
           {imgElement}
         </picture>
       ) : (

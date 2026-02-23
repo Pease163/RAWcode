@@ -51,11 +51,12 @@ export function Portfolio() {
                     <ImageSkeleton
                       src={caseItem.image}
                       srcWebp={caseItem.imageWebp}
+                      srcAvif={caseItem.imageAvif}
                       alt={`${caseItem.title} - ${caseItem.category} проект`}
                       loading="lazy"
                       width={caseItem.width}
                       height={caseItem.height}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-700 will-change-transform"
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-700 group-hover:will-change-[filter]"
                     />
                   </motion.div>
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F11] to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>

@@ -14,16 +14,22 @@ export function Navbar() {
   const location = useLocation();
   const { scrollY } = useScroll();
   const prevScroll = useRef(0);
+  const hiddenRef = useRef(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const pendingSectionRef = useRef<string | null>(null);
 
   // Hide navbar on scroll down, show on scroll up
   useMotionValueEvent(scrollY, 'change', (latest) => {
     const diff = latest - prevScroll.current;
+    let next = hiddenRef.current;
     if (latest > 100 && diff > 5) {
-      setHidden(true);
+      next = true;
     } else if (diff < -5) {
-      setHidden(false);
+      next = false;
+    }
+    if (next !== hiddenRef.current) {
+      hiddenRef.current = next;
+      setHidden(next);
     }
     prevScroll.current = latest;
   });
@@ -104,7 +110,7 @@ export function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-50 bg-[#0F0F11]/95 supports-[backdrop-filter]:bg-[#0F0F11]/80 supports-[backdrop-filter]:backdrop-blur-xl border-b border-white/10"
+        className="fixed top-0 left-0 right-0 z-50 bg-[#0F0F11]/95 supports-[backdrop-filter]:bg-[#0F0F11]/90 supports-[backdrop-filter]:backdrop-blur-md border-b border-white/10"
         animate={{ y: hidden ? '-100%' : '0%' }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
@@ -113,7 +119,7 @@ export function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-1" style={{ fontFamily: 'var(--font-heading)' }}>
               <span className="text-2xl font-bold tracking-wide text-[#F4F4F0]">RawCode</span>
-              <div className="w-2 h-2 bg-[#CCFF00] rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-[#CCFF00] rounded-full shadow-[0_0_6px_rgba(204,255,0,0.6)]"></div>
             </Link>
 
             {/* Desktop Menu */}
@@ -215,7 +221,7 @@ export function Navbar() {
           >
             <button
               onClick={() => navigateToSection('footer')}
-              className="block w-full py-4 bg-[#CCFF00] text-[#0F0F11] rounded-full font-bold text-center text-lg hover:bg-[#FF3B00] hover:text-white transition-all duration-300 shadow-[0_0_30px_rgba(204,255,0,0.4)] cursor-pointer"
+              className="block w-full py-4 bg-[#CCFF00] text-[#0F0F11] rounded-full font-bold text-center text-lg hover:bg-[#FF3B00] hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(204,255,0,0.3)] cursor-pointer"
             >
               Обсудить проект
             </button>
